@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -232,13 +233,30 @@ class PooledClusterConnectionProvider<K, V> implements ClusterConnectionProvider
         return filteredReaderCandidates
                 .thenApply(statefulRedisConnections -> {
 
-                    CompletableFuture<StatefulRedisConnection<K, V>> toCache[] = new CompletableFuture[statefulRedisConnections.length];
+                    boolean orderSensitive = OrderingReadFromAccessor.isOrderSensitive(readFrom)
+                            || statefulRedisConnections.length == 1;
 
-                    for (int i = 0; i < toCache.length; i++) {
-                        toCache[i] = CompletableFuture.completedFuture(statefulRedisConnections[i]);
-                    }
-                    synchronized (stateLock) {
-                        readers[slot] = toCache;
+                    if (orderSensitive) {
+                        CompletableFuture<StatefulRedisConnection<K, V>> toCache[] = new CompletableFuture[statefulRedisConnections.length];
+
+                        for (int i = 0; i < toCache.length; i++) {
+                            toCache[i] = CompletableFuture.completedFuture(statefulRedisConnections[i]);
+                        }
+                        synchronized (stateLock) {
+                            readers[slot] = toCache;
+                        }
+                    } else {
+
+                        // Perform up to two attempts for random nodes.
+                        for (int i = 0; i < Math.min(2, selectedReaderCandidates.length); i++) {
+
+                            int index = ThreadLocalRandom.current().nextInt(selectedReaderCandidates.length);
+                            StatefulRedisConnection<K, V> candidate = statefulRedisConnections[index];
+
+                            if (candidate.isOpen()) {
+                                return candidate;
+                            }
+                        }
                     }
 
                     for (StatefulRedisConnection<K, V> candidate : statefulRedisConnections) {
