@@ -55,11 +55,38 @@ public interface RedisStreamCommands<K, V> {
      * Append a message to the stream {@code key}.
      *
      * @param key the stream key.
+     * @param expectLast expected last message Id.
+     * @param body message body.
+     * @return {@link StreamMessage} instance:
+     * <li>stream - streamKey.</li>
+     * <li>id - added message Id, if the message has been added. Otherwise - last message Id.</li>
+     * <li>body - {@code null}, if the message has been added. Otherwise - last message body.</li>
+     */
+    StreamMessage<K, V> xaddExpectLast(K key, String expectLast, Map<K, V> body);
+
+    /**
+     * Append a message to the stream {@code key}.
+     *
+     * @param key the stream key.
      * @param args
      * @param body message body.
      * @return simple-reply the message Id.
      */
     String xadd(K key, XAddArgs args, Map<K, V> body);
+
+    /**
+     * Append a message to the stream {@code key}.
+     *
+     * @param key the stream key.
+     * @param expectLast expected last message Id.
+     * @param args
+     * @param body message body.
+     * @return {@link StreamMessage} instance:
+     * <li>stream - streamKey.</li>
+     * <li>id - added message Id, if the message has been added. Otherwise - last message Id.</li>
+     * <li>body - {@code null}, if the message has been added. Otherwise - last message body.</li>
+     */
+    StreamMessage<K, V> xaddExpectLast(K key, String expectLast, XAddArgs args, Map<K, V> body);
 
     /**
      * Append a message to the stream {@code key}.
@@ -74,11 +101,38 @@ public interface RedisStreamCommands<K, V> {
      * Append a message to the stream {@code key}.
      *
      * @param key the stream key.
+     * @param expectLast expected last message Id.
+     * @param keysAndValues message body.
+     * @return {@link StreamMessage} instance:
+     * <li>stream - streamKey.</li>
+     * <li>id - added message Id, if the message has been added. Otherwise - last message Id.</li>
+     * <li>body - {@code null}, if the message has been added. Otherwise - last message body.</li>
+     */
+    StreamMessage<K, V> xaddExpectLast(K key, String expectLast, Object... keysAndValues);
+
+    /**
+     * Append a message to the stream {@code key}.
+     *
+     * @param key the stream key.
      * @param args
      * @param keysAndValues message body.
      * @return simple-reply the message Id.
      */
     String xadd(K key, XAddArgs args, Object... keysAndValues);
+
+    /**
+     * Append a message to the stream {@code key}.
+     *
+     * @param key the stream key.
+     * @param expectLast expected last message Id.
+     * @param args
+     * @param keysAndValues message body.
+     * @return {@link StreamMessage} instance:
+     * <li>stream - streamKey.</li>
+     * <li>id - added message Id, if the message has been added. Otherwise - last message Id.</li>
+     * <li>body - {@code null}, if the message has been added. Otherwise - last message body.</li>
+     */
+    StreamMessage<K, V> xaddExpectLast(K key, String expectLast, XAddArgs args, Object... keysAndValues);
 
     /**
      * Gets ownership of one or multiple messages in the Pending Entries List of a given stream consumer group.

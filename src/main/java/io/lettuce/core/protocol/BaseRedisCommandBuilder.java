@@ -20,6 +20,8 @@ import io.lettuce.core.ScriptOutputType;
 import io.lettuce.core.codec.RedisCodec;
 import io.lettuce.core.output.*;
 
+import java.util.function.Function;
+
 /**
  * @author Mark Paluch
  * @since 3.0
@@ -53,6 +55,11 @@ public class BaseRedisCommandBuilder<K, V> {
 
     protected <T> Command<K, V, T> createCommand(CommandType type, CommandOutput<K, V, T> output, CommandArgs<K, V> args) {
         return new Command<K, V, T>(type, output, args);
+    }
+
+    protected <T1, T2> Command<K, V, T2> createCommand(Command<K, V, T1> src, Function<T1, T2> transformation) {
+        TransformedOutput<K, V, T1, T2> output = new TransformedOutput<>(src.getOutput(), transformation);
+        return new Command<>(src.getType(), output, src.getArgs());
     }
 
     @SuppressWarnings("unchecked")

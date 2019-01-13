@@ -90,6 +90,61 @@ public class StreamCommandIntegrationTests extends TestSupport {
     }
 
     @Test
+    void xaddExpectLast() {
+
+        StreamMessage<String, String> m1_1 =
+                redis.xaddExpectLast("stream-1", "0-0", Collections.singletonMap("key-1-1", "value-1-1"));
+        StreamMessage<String, String> m2_1 =
+                redis.xaddExpectLast("stream-2", "123-0", Collections.singletonMap("key-2-1", "value-2-1"));
+        StreamMessage<String, String> m2_2 = redis.xaddExpectLast("stream-2", "0-0",
+                        new XAddArgs().id("123-0"), Collections.singletonMap("key-2-2", "value-2-2"));
+        StreamMessage<String, String> m1_2 =
+                redis.xaddExpectLast("stream-1", m1_1.getId(), Collections.singletonMap("key-1-2", "value-1-2"));
+        StreamMessage<String, String> m1_3 =
+                redis.xaddExpectLast("stream-1", "0-0", Collections.singletonMap("key-1-3", "value-1-3"));
+        StreamMessage<String, String> m1_4 =
+                redis.xaddExpectLast("stream-1", m1_1.getId(), Collections.singletonMap("key-1-4", "value-1-4"));
+
+        assertThat(m1_1.getStream()).isEqualTo("stream-1");
+        assertThat(m1_1.getBody()).isNull();
+        assertThat(m1_1.getId()).isNotEmpty();
+
+        assertThat(m2_1.getStream()).isEqualTo("stream-2");
+        assertThat(m2_1.getBody()).isEmpty();
+        assertThat(m2_1.getId()).isEqualTo("0-0");
+
+        assertThat(m2_2.getStream()).isEqualTo("stream-2");
+        assertThat(m2_2.getBody()).isNull();
+        assertThat(m2_2.getId()).isEqualTo("123-0");
+
+        assertThat(m1_2.getStream()).isEqualTo("stream-1");
+        assertThat(m1_2.getBody()).isNull();
+        assertThat(m1_2.getId()).isNotEmpty();
+
+        assertThat(m1_3.getStream()).isEqualTo("stream-1");
+        assertThat(m1_3.getBody()).isEqualTo(Collections.singletonMap("key-1-2", "value-1-2"));
+        assertThat(m1_3.getId()).isEqualTo(m1_2.getId());
+
+        assertThat(m1_4.getStream()).isEqualTo("stream-1");
+        assertThat(m1_4.getBody()).isEqualTo(Collections.singletonMap("key-1-2", "value-1-2"));
+        assertThat(m1_4.getId()).isEqualTo(m1_2.getId());
+
+        List<StreamMessage<String, String>> messages = redis.xread(StreamOffset.from("stream-1", "0-0"));
+
+        StreamMessage<String, String> firstMessage = messages.get(0);
+
+        assertThat(firstMessage.getId()).isEqualTo(m1_1.getId());
+        assertThat(firstMessage.getStream()).isEqualTo("stream-1");
+        assertThat(firstMessage.getBody()).containsEntry("key-1-1", "value-1-1");
+
+        StreamMessage<String, String> secondMessage = messages.get(1);
+
+        assertThat(secondMessage.getId()).isEqualTo(m1_2.getId());
+        assertThat(secondMessage.getStream()).isEqualTo("stream-1");
+        assertThat(secondMessage.getBody()).containsEntry("key-1-2", "value-1-2");
+    }
+
+    @Test
     void xdel() {
 
         List<String> ids = new ArrayList<>();

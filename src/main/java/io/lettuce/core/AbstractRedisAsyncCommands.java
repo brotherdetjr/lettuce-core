@@ -1495,8 +1495,18 @@ public abstract class AbstractRedisAsyncCommands<K, V> implements RedisHashAsync
     }
 
     @Override
+    public RedisFuture<StreamMessage<K, V>> xaddExpectLast(K key, String expectLast, Map<K, V> body) {
+        return dispatch(commandBuilder.xadd(key, expectLast, null, body));
+    }
+
+    @Override
     public RedisFuture<String> xadd(K key, XAddArgs args, Map<K, V> body) {
         return dispatch(commandBuilder.xadd(key, args, body));
+    }
+
+    @Override
+    public RedisFuture<StreamMessage<K, V>> xaddExpectLast(K key, String expectLast, XAddArgs args, Map<K, V> body) {
+        return dispatch(commandBuilder.xadd(key, expectLast, args, body));
     }
 
     @Override
@@ -1505,8 +1515,18 @@ public abstract class AbstractRedisAsyncCommands<K, V> implements RedisHashAsync
     }
 
     @Override
+    public RedisFuture<StreamMessage<K, V>> xaddExpectLast(K key, String expectLast, Object... keysAndValues) {
+        return dispatch(commandBuilder.xadd(key, expectLast, null, keysAndValues));
+    }
+
+    @Override
     public RedisFuture<String> xadd(K key, XAddArgs args, Object... keysAndValues) {
         return dispatch(commandBuilder.xadd(key, args, keysAndValues));
+    }
+
+    @Override
+    public RedisFuture<StreamMessage<K, V>> xaddExpectLast(K key, String expectLast, XAddArgs args, Object... keysAndValues) {
+        return dispatch(commandBuilder.xadd(key, expectLast, args, keysAndValues));
     }
 
     @Override

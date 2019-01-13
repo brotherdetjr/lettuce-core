@@ -2091,10 +2091,18 @@ class RedisCommandBuilder<K, V> extends BaseRedisCommandBuilder<K, V> {
     }
 
     public Command<K, V, String> xadd(K key, XAddArgs xAddArgs, Map<K, V> map) {
+        return createCommand(xadd(key, null, xAddArgs, map), StreamMessage::getId);
+    }
+
+    public Command<K, V, StreamMessage<K, V>> xadd(K key, String expectLast, XAddArgs xAddArgs, Map<K, V> map) {
         notNullKey(key);
         LettuceAssert.notNull(map, "Message body " + MUST_NOT_BE_NULL);
 
         CommandArgs<K, V> args = new CommandArgs<>(codec).addKey(key);
+
+        if (expectLast != null) {
+            args.add(CommandKeyword.EXPECTLAST).add(expectLast);
+        }
 
         if (xAddArgs != null) {
             xAddArgs.build(args);
@@ -2104,10 +2112,14 @@ class RedisCommandBuilder<K, V> extends BaseRedisCommandBuilder<K, V> {
 
         args.add(map);
 
-        return createCommand(XADD, new StatusOutput<>(codec), args);
+        return createCommand(XADD, new StreamMessageOutput<>(codec, key), args);
     }
 
     public Command<K, V, String> xadd(K key, XAddArgs xAddArgs, Object[] body) {
+        return createCommand(xadd(key, null, xAddArgs, body), StreamMessage::getId);
+    }
+
+    public Command<K, V, StreamMessage<K, V>> xadd(K key, String expectLast, XAddArgs xAddArgs, Object[] body) {
         notNullKey(key);
         LettuceAssert.notNull(body, "Message body " + MUST_NOT_BE_NULL);
         LettuceAssert.notEmpty(body, "Message body " + MUST_NOT_BE_EMPTY);
@@ -2116,6 +2128,10 @@ class RedisCommandBuilder<K, V> extends BaseRedisCommandBuilder<K, V> {
                 + "sequence of field1, value1, field2, value2, fieldN, valueN");
 
         CommandArgs<K, V> args = new CommandArgs<>(codec).addKey(key);
+
+        if (expectLast != null) {
+            args.add(CommandKeyword.EXPECTLAST).add(expectLast);
+        }
 
         if (xAddArgs != null) {
             xAddArgs.build(args);
@@ -2128,7 +2144,7 @@ class RedisCommandBuilder<K, V> extends BaseRedisCommandBuilder<K, V> {
             args.addValue((V) body[i + 1]);
         }
 
-        return createCommand(XADD, new StatusOutput<>(codec), args);
+        return createCommand(XADD, new StreamMessageOutput<>(codec, key), args);
     }
 
     public Command<K, V, Long> xdel(K key, String[] messageIds) {
