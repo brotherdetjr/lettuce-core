@@ -60,7 +60,8 @@ public interface RedisStreamCommands<K, V> {
      * @return {@link StreamMessage} instance:
      * <li>stream - streamKey.</li>
      * <li>id - added message Id, if the message has been added. Otherwise - last message Id.</li>
-     * <li>body - {@code null}, if the message has been added. Otherwise - last message body.</li>
+     * <li>body - {@code null}, if the message has been added. Otherwise - last message body.
+     * If the stream is empty, then {@link java.util.Collections#emptyMap()} is returned.</li>
      */
     StreamMessage<K, V> xaddExpectLast(K key, String expectLast, Map<K, V> body);
 
@@ -84,7 +85,8 @@ public interface RedisStreamCommands<K, V> {
      * @return {@link StreamMessage} instance:
      * <li>stream - streamKey.</li>
      * <li>id - added message Id, if the message has been added. Otherwise - last message Id.</li>
-     * <li>body - {@code null}, if the message has been added. Otherwise - last message body.</li>
+     * <li>body - {@code null}, if the message has been added. Otherwise - last message body.
+     * If the stream is empty, then {@link java.util.Collections#emptyMap()} is returned.</li>
      */
     StreamMessage<K, V> xaddExpectLast(K key, String expectLast, XAddArgs args, Map<K, V> body);
 
@@ -106,7 +108,8 @@ public interface RedisStreamCommands<K, V> {
      * @return {@link StreamMessage} instance:
      * <li>stream - streamKey.</li>
      * <li>id - added message Id, if the message has been added. Otherwise - last message Id.</li>
-     * <li>body - {@code null}, if the message has been added. Otherwise - last message body.</li>
+     * <li>body - {@code null}, if the message has been added. Otherwise - last message body.
+     * If the stream is empty, then {@link java.util.Collections#emptyMap()} is returned.</li>
      */
     StreamMessage<K, V> xaddExpectLast(K key, String expectLast, Object... keysAndValues);
 
@@ -130,7 +133,8 @@ public interface RedisStreamCommands<K, V> {
      * @return {@link StreamMessage} instance:
      * <li>stream - streamKey.</li>
      * <li>id - added message Id, if the message has been added. Otherwise - last message Id.</li>
-     * <li>body - {@code null}, if the message has been added. Otherwise - last message body.</li>
+     * <li>body - {@code null}, if the message has been added. Otherwise - last message body.
+     * If the stream is empty, then {@link java.util.Collections#emptyMap()} is returned.</li>
      */
     StreamMessage<K, V> xaddExpectLast(K key, String expectLast, XAddArgs args, Object... keysAndValues);
 
